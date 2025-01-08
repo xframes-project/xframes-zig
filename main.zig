@@ -57,6 +57,25 @@ const ImGuiCol = enum {
     COUNT,
 };
 
+const ThemeColors = struct {
+    white: []const u8 = "#ffffff",
+    black: []const u8 = "#000000",
+    darkestGrey: []const u8 = "#141f2c",
+    darkerGrey: []const u8 = "#2a2e39",
+    darkGrey: []const u8 = "#363b4a",
+    lightGrey: []const u8 = "#5a5a5a",
+    lighterGrey: []const u8 = "#7A818C",
+    evenLighterGrey: []const u8 = "#8491a3",
+    green: []const u8 = "#75f986",
+    red: []const u8 = "#ff0062",
+};
+
+const HEXA = std.meta.Tuple(&[_]type{ []const u8, f32 });
+
+pub const Theme = struct {
+    colors: std.AutoHashMap([]const u8, HEXA),
+};
+
 const FontDef = struct {
     name: []const u8,
     size: u8,
@@ -72,19 +91,15 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    var themeColors = std.StringHashMap([]const u8).init(allocator);
-    defer themeColors.deinit();
+    const themeColors = ThemeColors{};
 
-    try themeColors.put("darkestGrey", "#141f2c");
-    try themeColors.put("darkerGrey", "#2a2e39");
-    try themeColors.put("darkGrey", "#363b4a");
-    try themeColors.put("lightGrey", "#5a5a5a");
-    try themeColors.put("lighterGrey", "#7A818C");
-    try themeColors.put("evenLighterGrey", "#8491a3");
-    try themeColors.put("black", "#0A0B0D");
-    try themeColors.put("green", "#75f986");
-    try themeColors.put("red", "#ff0062");
-    try themeColors.put("white", "#fff");
+    try std.io.getStdOut().writer().print("{s}\n", .{themeColors.white});
+
+    var map = std.AutoHashMap([]const u8, HEXA).init(allocator);
+    defer map.deinit();
+
+    // Adding entries to the map
+    // try map.put("Text", .{ themeColors.white, 1.0 });
 
     const sizes = [_]u8{ 16, 18, 20, 24, 28, 32, 36, 48 };
     var defs = try allocator.alloc(FontDef, sizes.len);
