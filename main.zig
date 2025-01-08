@@ -87,14 +87,64 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    const themeColors = ThemeColors{};
-
-    try std.io.getStdOut().writer().print("{s}\n", .{themeColors.white});
+    const theme2Colors = ThemeColors{};
 
     var map = std.AutoHashMap(ImGuiCol, HEXA).init(allocator);
     defer map.deinit();
 
-    try map.put(ImGuiCol.Text, .{ themeColors.white, 1.0 });
+    try map.put(ImGuiCol.Text, .{ theme2Colors.white, 1.0 });
+    try map.put(ImGuiCol.TextDisabled, .{ theme2Colors.lighterGrey, 1.0 });
+    try map.put(ImGuiCol.WindowBg, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.ChildBg, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.PopupBg, .{ theme2Colors.white, 1.0 });
+    try map.put(ImGuiCol.Border, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.BorderShadow, .{ theme2Colors.darkestGrey, 1.0 });
+    try map.put(ImGuiCol.FrameBg, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.FrameBgHovered, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.FrameBgActive, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.TitleBg, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.TitleBgActive, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.TitleBgCollapsed, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.MenuBarBg, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.ScrollbarBg, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.ScrollbarGrab, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.ScrollbarGrabHovered, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.ScrollbarGrabActive, .{ theme2Colors.darkestGrey, 1.0 });
+    try map.put(ImGuiCol.CheckMark, .{ theme2Colors.darkestGrey, 1.0 });
+    try map.put(ImGuiCol.SliderGrab, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.SliderGrabActive, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.Button, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.ButtonHovered, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.ButtonActive, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.Header, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.HeaderHovered, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.HeaderActive, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.Separator, .{ theme2Colors.darkestGrey, 1.0 });
+    try map.put(ImGuiCol.SeparatorHovered, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.SeparatorActive, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.ResizeGrip, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.ResizeGripHovered, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.ResizeGripActive, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.Tab, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.TabHovered, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.TabActive, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.TabUnfocused, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.TabUnfocusedActive, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.PlotLines, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.PlotLinesHovered, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.PlotHistogram, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.PlotHistogramHovered, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.TableHeaderBg, .{ theme2Colors.black, 1.0 });
+    try map.put(ImGuiCol.TableBorderStrong, .{ theme2Colors.lightGrey, 1.0 });
+    try map.put(ImGuiCol.TableBorderLight, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.TableRowBg, .{ theme2Colors.darkGrey, 1.0 });
+    try map.put(ImGuiCol.TableRowBgAlt, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.TextSelectedBg, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.DragDropTarget, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.NavHighlight, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.NavWindowingHighlight, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.NavWindowingDimBg, .{ theme2Colors.darkerGrey, 1.0 });
+    try map.put(ImGuiCol.ModalWindowDimBg, .{ theme2Colors.darkerGrey, 1.0 });
 
     const sizes = [_]u8{ 16, 18, 20, 24, 28, 32, 36, 48 };
     var defs = try allocator.alloc(FontDef, sizes.len);
