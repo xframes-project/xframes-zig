@@ -58,23 +58,19 @@ const ImGuiCol = enum {
 };
 
 const ThemeColors = struct {
-    white: []const u8 = "#ffffff",
-    black: []const u8 = "#000000",
     darkestGrey: []const u8 = "#141f2c",
     darkerGrey: []const u8 = "#2a2e39",
     darkGrey: []const u8 = "#363b4a",
     lightGrey: []const u8 = "#5a5a5a",
     lighterGrey: []const u8 = "#7A818C",
     evenLighterGrey: []const u8 = "#8491a3",
+    black: []const u8 = "#0A0B0D",
     green: []const u8 = "#75f986",
     red: []const u8 = "#ff0062",
+    white: []const u8 = "#fff",
 };
 
 const HEXA = std.meta.Tuple(&[_]type{ []const u8, f32 });
-
-pub const Theme = struct {
-    colors: std.AutoHashMap([]const u8, HEXA),
-};
 
 const FontDef = struct {
     name: []const u8,
@@ -95,11 +91,10 @@ pub fn main() !void {
 
     try std.io.getStdOut().writer().print("{s}\n", .{themeColors.white});
 
-    var map = std.AutoHashMap([]const u8, HEXA).init(allocator);
+    var map = std.AutoHashMap(ImGuiCol, HEXA).init(allocator);
     defer map.deinit();
 
-    // Adding entries to the map
-    // try map.put("Text", .{ themeColors.white, 1.0 });
+    try map.put(ImGuiCol.Text, .{ themeColors.white, 1.0 });
 
     const sizes = [_]u8{ 16, 18, 20, 24, 28, 32, 36, 48 };
     var defs = try allocator.alloc(FontDef, sizes.len);
