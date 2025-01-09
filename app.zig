@@ -1,6 +1,14 @@
 const std = @import("std");
 
-extern "c" fn init() void;
+const OnInitCb = *const fn () callconv(.C) void;
+const OnTextChangedCb = *const fn (i32, [*:0]const u8) callconv(.C) void;
+const OnComboChangedCb = *const fn (i32, i32) callconv(.C) void;
+const OnNumericValueChangedCb = *const fn (i32, f32) callconv(.C) void;
+const OnBooleanValueChangedCb = *const fn (i32, bool) callconv(.C) void;
+const OnMultipleNumericValuesChangedCb = *const fn (i32, *f32, i32) callconv(.C) void;
+const OnClickCb = *const fn (i32) callconv(.C) void;
+
+extern "c" fn init(assetsBasePath: [*]const u8, rawFontDefinitions: [*]const u8, rawStyleOverrideDefinitions: [*]const u8, onInit: OnInitCb, onTextChanged: OnTextChangedCb, onComboChanged: OnComboChangedCb, onNumericValueChanged: OnNumericValueChangedCb, onBooleanValueChanged: OnBooleanValueChangedCb, onMultipleNumericValuesChanged: OnMultipleNumericValuesChangedCb, onClick: OnClickCb) callconv(.C) void;
 
 const ImGuiCol = enum {
     Text,
@@ -83,6 +91,34 @@ const FontDefs = struct {
     defs: []const FontDef,
 };
 
+fn onInit() callconv(.C) void {
+    // std.debug.print("Initialized!\n", .{});
+}
+
+fn onTextChanged(id: i32, _: [*:0]const u8) callconv(.C) void {
+    std.debug.print("Text changed {}:\n", .{id});
+}
+
+fn onComboChanged(id: i32, selectedIndex: i32) callconv(.C) void {
+    std.debug.print("Combo changed {}: {}\n", .{ id, selectedIndex });
+}
+
+fn onNumericValueChanged(id: i32, value: f32) callconv(.C) void {
+    std.debug.print("Numeric value changed {}: {}\n", .{ id, value });
+}
+
+fn onBooleanValueChanged(id: i32, value: bool) callconv(.C) void {
+    std.debug.print("Boolean value changed {}: {}\n", .{ id, value });
+}
+
+fn onMultipleNumericValuesChanged(id: i32, _: *f32, numValues: i32) callconv(.C) void {
+    std.debug.print("Multiple numeric values changed {}: {}\n", .{ id, numValues });
+}
+
+fn onClick(id: i32) callconv(.C) void {
+    std.debug.print("Clicked {}\n", .{id});
+}
+
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 
@@ -158,17 +194,19 @@ pub fn main() !void {
 
     const result = FontDefs{ .defs = defs };
 
-    var buf = std.ArrayList(u8).init(allocator);
-    defer buf.deinit();
+    var fontDefBuffer = std.ArrayList(u8).init(allocator);
+    defer fontDefBuffer.deinit();
 
-    try std.json.stringify(result, .{}, buf.writer());
+    try std.json.stringify(result, .{}, fontDefBuffer.writer());
 
-    try std.io.getStdOut().writer().print("{s}\n", .{buf.items});
+    try fontDefBuffer.append(0);
 
-    var list = std.ArrayList(u8).init(allocator);
-    defer list.deinit();
+    const fontDefJson: []const u8 = fontDefBuffer.items;
 
-    var stream = std.json.writeStream(list.writer(), .{});
+    var themeBuffer = std.ArrayList(u8).init(allocator);
+    defer themeBuffer.deinit();
+
+    var stream = std.json.writeStream(themeBuffer.writer(), .{});
 
     try stream.beginObject();
     try stream.objectField("colors");
@@ -192,8 +230,24 @@ pub fn main() !void {
     try stream.endObject();
     try stream.endObject();
 
-    const json_string = list.items;
-    std.debug.print("JSON: {s}\n", .{json_string});
+    try themeBuffer.append(0);
 
-    _ = init();
+    const themeJsonDef: []const u8 = themeBuffer.items;
+    // std.debug.print("JSON: {s}\n", .{themeJsonDef});
+
+    const assetsBasePath = "./assets";
+
+    init(assetsBasePath, fontDefJson.ptr, themeJsonDef.ptr, &onInit, &onTextChanged, &onComboChanged, &onNumericValueChanged, &onBooleanValueChanged, &onMultipleNumericValuesChanged, &onClick);
+
+    const in = std.io.getStdIn();
+    var stdinBuf = std.io.bufferedReader(in.reader());
+
+    // Get the Reader interface from BufferedReader
+    var r = stdinBuf.reader();
+
+    std.debug.print("Press enter to exit the application\n", .{});
+    // Ideally we would want to issue more than one read
+    // otherwise there is no point in buffering.
+    var msg_buf: [4096]u8 = undefined;
+    _ = try r.readUntilDelimiterOrEof(&msg_buf, '\n');
 }

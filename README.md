@@ -6,7 +6,6 @@
 
 https://ziglang.org/download/
 
-zig run main.zig
+### Building
 
-zig build-exe main.zig
-main
+zig build
