@@ -8,6 +8,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
     });
 
+    exe.linkLibC();
     exe.addLibraryPath(b.path("./"));
     exe.linkSystemLibrary("xframesshared");
     // Additional configurations can be added here

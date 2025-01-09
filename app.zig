@@ -1,5 +1,7 @@
 const std = @import("std");
 
+extern "c" fn init() void;
+
 const ImGuiCol = enum {
     Text,
     TextDisabled,
@@ -192,4 +194,6 @@ pub fn main() !void {
 
     const json_string = list.items;
     std.debug.print("JSON: {s}\n", .{json_string});
+
+    _ = init();
 }
