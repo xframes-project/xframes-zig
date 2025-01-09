@@ -162,4 +162,34 @@ pub fn main() !void {
     try std.json.stringify(result, .{}, buf.writer());
 
     try std.io.getStdOut().writer().print("{s}\n", .{buf.items});
+
+    var list = std.ArrayList(u8).init(allocator);
+    defer list.deinit();
+
+    var stream = std.json.writeStream(list.writer(), .{});
+
+    try stream.beginObject();
+    try stream.objectField("colors");
+    try stream.beginObject();
+
+    var iterator = map.iterator();
+    while (iterator.next()) |entry| {
+        const keyAsEnumValue = entry.key_ptr.*;
+        const hexa = entry.value_ptr.*;
+
+        const index_str = try std.fmt.allocPrint(allocator, "{d}", .{@intFromEnum(keyAsEnumValue)});
+        defer allocator.free(index_str);
+
+        try stream.objectField(index_str);
+        try stream.beginArray();
+        try stream.write(hexa[0]);
+        try stream.write(hexa[1]);
+        try stream.endArray();
+    }
+
+    try stream.endObject();
+    try stream.endObject();
+
+    const json_string = list.items;
+    std.debug.print("JSON: {s}\n", .{json_string});
 }
