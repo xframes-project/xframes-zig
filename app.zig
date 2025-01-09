@@ -10,6 +10,10 @@ const OnClickCb = *const fn (i32) callconv(.C) void;
 
 extern "c" fn init(assetsBasePath: [*]const u8, rawFontDefinitions: [*]const u8, rawStyleOverrideDefinitions: [*]const u8, onInit: OnInitCb, onTextChanged: OnTextChangedCb, onComboChanged: OnComboChangedCb, onNumericValueChanged: OnNumericValueChangedCb, onBooleanValueChanged: OnBooleanValueChangedCb, onMultipleNumericValuesChanged: OnMultipleNumericValuesChangedCb, onClick: OnClickCb) callconv(.C) void;
 
+extern "c" fn setElement(elementJson: [*]const u8) callconv(.C) void;
+
+extern "c" fn setChildren(parentId: i32, childrenIdsJson: [*]const u8) callconv(.C) void;
+
 const ImGuiCol = enum {
     Text,
     TextDisabled,
@@ -93,10 +97,66 @@ const FontDefs = struct {
 
 fn onInit() callconv(.C) void {
     // std.debug.print("Initialized!\n", .{});
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+
+    defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    var rootNodeBuffer = std.ArrayList(u8).init(allocator);
+    defer rootNodeBuffer.deinit();
+
+    var unformattedTextBuffer = std.ArrayList(u8).init(allocator);
+    defer unformattedTextBuffer.deinit();
+
+    var rootNodeBufferStream = std.json.writeStream(rootNodeBuffer.writer(), .{});
+    var unformattedTextBufferStream = std.json.writeStream(unformattedTextBuffer.writer(), .{});
+
+    rootNodeBufferStream.beginObject() catch unreachable;
+    rootNodeBufferStream.objectField("id") catch unreachable;
+    rootNodeBufferStream.write(0) catch unreachable;
+    rootNodeBufferStream.objectField("type") catch unreachable;
+    rootNodeBufferStream.write("node") catch unreachable;
+    rootNodeBufferStream.endObject() catch unreachable;
+
+    rootNodeBuffer.append(0) catch unreachable;
+
+    const rootNodeCharArray: []const u8 = rootNodeBuffer.items;
+
+    unformattedTextBufferStream.beginObject() catch unreachable;
+    unformattedTextBufferStream.objectField("id") catch unreachable;
+    unformattedTextBufferStream.write(1) catch unreachable;
+    unformattedTextBufferStream.objectField("type") catch unreachable;
+    unformattedTextBufferStream.write("unformatted-text") catch unreachable;
+    unformattedTextBufferStream.objectField("text") catch unreachable;
+    unformattedTextBufferStream.write("Hello, world") catch unreachable;
+    unformattedTextBufferStream.endObject() catch unreachable;
+
+    unformattedTextBuffer.append(0) catch unreachable;
+
+    const unformattedTextCharArray: []const u8 = unformattedTextBuffer.items;
+
+    setElement(rootNodeCharArray.ptr);
+    setElement(unformattedTextCharArray.ptr);
+
+    var childrenIdsBuffer = std.ArrayList(u8).init(allocator);
+    defer childrenIdsBuffer.deinit();
+
+    const children = [1]i32{1};
+
+    std.json.stringify(children, .{}, childrenIdsBuffer.writer()) catch unreachable;
+
+    childrenIdsBuffer.append(0) catch unreachable;
+
+    const childrenIdsCharArray: []const u8 = childrenIdsBuffer.items;
+
+    setChildren(0, childrenIdsCharArray.ptr);
 }
 
-fn onTextChanged(id: i32, _: [*:0]const u8) callconv(.C) void {
-    std.debug.print("Text changed {}:\n", .{id});
+fn onTextChanged(id: i32, rawValue: [*:0]const u8) callconv(.C) void {
+    const value: [:0]const u8 = std.mem.span(rawValue);
+
+    std.debug.print("Text changed {}: {s}\n", .{ id, value });
 }
 
 fn onComboChanged(id: i32, selectedIndex: i32) callconv(.C) void {
@@ -233,7 +293,6 @@ pub fn main() !void {
     try themeBuffer.append(0);
 
     const themeJsonDef: []const u8 = themeBuffer.items;
-    // std.debug.print("JSON: {s}\n", .{themeJsonDef});
 
     const assetsBasePath = "./assets";
 
@@ -242,12 +301,9 @@ pub fn main() !void {
     const in = std.io.getStdIn();
     var stdinBuf = std.io.bufferedReader(in.reader());
 
-    // Get the Reader interface from BufferedReader
     var r = stdinBuf.reader();
 
     std.debug.print("Press enter to exit the application\n", .{});
-    // Ideally we would want to issue more than one read
-    // otherwise there is no point in buffering.
     var msg_buf: [4096]u8 = undefined;
     _ = try r.readUntilDelimiterOrEof(&msg_buf, '\n');
 }
