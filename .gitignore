@@ -7,4 +7,5 @@ zig-out/
 *.dll
 *.lib
 *.so
+*.so.*
 .vscode
