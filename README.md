@@ -6,6 +6,10 @@
 
 https://ziglang.org/download/
 
+#### Linux
+
+https://github.com/ziglang/zig/wiki/Install-Zig-from-a-Package-Manager
+
 ### Building
 
 Run `zig build`
